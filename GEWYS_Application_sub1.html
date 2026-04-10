@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GEWYS Application</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Source+Sans+3:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+  :root {
+    --navy: #1a2744; --navy-light: #2a3f6a; --gold: #c9a84c; --gold-light: #e8d59a;
+    --cream: #faf7f0; --cream-dark: #f0ead6; --text: #2c2c2c; --text-light: #6b6b6b;
+    --border: #d4cfc2; --red: #c0392b; --green: #27ae60; --white: #ffffff;
+    --shadow: 0 2px 12px rgba(26,39,68,0.08); --shadow-lg: 0 8px 32px rgba(26,39,68,0.12);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Source Sans 3',sans-serif; background:var(--cream); color:var(--text); line-height:1.6; min-height:100vh; }
+
+  .page-header { background:var(--navy); color:var(--white); text-align:center; padding:2.5rem 1rem 2rem; position:relative; overflow:hidden; }
+  .page-header::before { content:''; position:absolute; top:0;left:0;right:0;bottom:0; background:repeating-linear-gradient(120deg,transparent,transparent 40px,rgba(201,168,76,0.03) 40px,rgba(201,168,76,0.03) 80px); }
+  .page-header h1 { font-family:'Playfair Display',serif; font-size:1.6rem; font-weight:800; letter-spacing:0.03em; position:relative; }
+  .page-header .subtitle { font-size:1.1rem; font-weight:600; color:var(--gold); margin-top:0.3rem; letter-spacing:0.08em; text-transform:uppercase; position:relative; }
+  .page-header .location { font-size:0.85rem; font-weight:300; color:var(--gold-light); margin-top:0.2rem; position:relative; }
+
+  .form-container { max-width:820px; margin:0 auto; padding:1.5rem; }
+
+  .progress-bar { display:flex; gap:0.5rem; margin-bottom:2rem; padding:0 0.5rem; }
+  .progress-step { flex:1; text-align:center; position:relative; }
+  .progress-step .dot { width:32px; height:32px; border-radius:50%; background:var(--border); display:flex; align-items:center; justify-content:center; margin:0 auto 0.4rem; font-weight:700; font-size:0.8rem; color:var(--text-light); transition:all 0.4s ease; }
+  .progress-step.active .dot { background:var(--navy); color:var(--white); box-shadow:0 0 0 4px rgba(26,39,68,0.15); }
+  .progress-step.completed .dot { background:var(--green); color:var(--white); }
+  .progress-step .label { font-size:0.7rem; font-weight:600; color:var(--text-light); text-transform:uppercase; letter-spacing:0.05em; }
+  .progress-step.active .label { color:var(--navy); }
+  .progress-step.completed .label { color:var(--green); }
+  .progress-line { position:absolute; top:16px; left:50%; width:100%; height:2px; background:var(--border); z-index:0; }
+  .progress-step:last-child .progress-line { display:none; }
+  .progress-step.completed .progress-line { background:var(--green); }
+
+  .form-section { background:var(--white); border-radius:12px; padding:2rem; margin-bottom:1.5rem; box-shadow:var(--shadow); border:1px solid rgba(212,207,194,0.5); display:none; animation:fadeIn 0.4s ease; }
+  .form-section.active { display:block; }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+
+  .section-title { font-family:'Playfair Display',serif; font-size:1.3rem; font-weight:700; color:var(--navy); margin-bottom:0.3rem; display:flex; align-items:center; gap:0.5rem; }
+  .section-title .icon { width:28px; height:28px; background:var(--gold); color:var(--white); border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:0.85rem; flex-shrink:0; }
+  .section-desc { font-size:0.85rem; color:var(--text-light); margin-bottom:1.5rem; padding-bottom:1rem; border-bottom:1px solid var(--cream-dark); }
+
+  .form-row { display:grid; gap:1rem; margin-bottom:1rem; }
+  .form-row.two { grid-template-columns:1fr 1fr; }
+  .form-row.three { grid-template-columns:1fr 1fr 1fr; }
+  @media(max-width:600px) { .form-row.two,.form-row.three { grid-template-columns:1fr; } }
+
+  .field-group label { display:block; font-size:0.78rem; font-weight:600; color:var(--text-light); text-transform:uppercase; letter-spacing:0.04em; margin-bottom:0.35rem; }
+  .field-group label .req { color:var(--red); margin-left:2px; }
+  .field-group input, .field-group select, .field-group textarea { width:100%; padding:0.65rem 0.85rem; border:1.5px solid var(--border); border-radius:8px; font-family:'Source Sans 3',sans-serif; font-size:0.95rem; color:var(--text); background:var(--white); transition:border-color 0.2s,box-shadow 0.2s; outline:none; }
+  .field-group input:focus, .field-group select:focus, .field-group textarea:focus { border-color:var(--navy); box-shadow:0 0 0 3px rgba(26,39,68,0.08); }
+  .field-group textarea { resize:vertical; min-height:70px; }
+  .field-group input.error, .field-group select.error, .field-group textarea.error { border-color:var(--red); box-shadow:0 0 0 3px rgba(192,57,43,0.08); }
+
+  .inline-label { font-size:0.85rem; color:var(--text); display:flex; align-items:center; gap:0.5rem; cursor:pointer; }
+  .inline-label input[type="checkbox"],.inline-label input[type="radio"] { width:18px; height:18px; accent-color:var(--navy); cursor:pointer; }
+  .checkbox-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:0.6rem; margin-top:0.5rem; }
+
+  .subsection { background:var(--cream); border-radius:8px; padding:1.2rem; margin:1rem 0; }
+  .subsection-title { font-weight:700; font-size:0.9rem; color:var(--navy); margin-bottom:0.8rem; text-transform:uppercase; letter-spacing:0.04em; }
+
+  .consent-box { background:var(--cream); border:2px solid var(--gold); border-radius:10px; padding:1.2rem; margin-top:1rem; font-size:0.88rem; line-height:1.7; color:var(--text); }
+
+  .btn-row { display:flex; justify-content:space-between; gap:1rem; margin-top:1.5rem; }
+  .btn { padding:0.75rem 2rem; border-radius:8px; font-family:'Source Sans 3',sans-serif; font-size:0.95rem; font-weight:600; cursor:pointer; transition:all 0.2s; border:none; display:inline-flex; align-items:center; gap:0.5rem; }
+  .btn-primary { background:var(--navy); color:var(--white); }
+  .btn-primary:hover { background:var(--navy-light); transform:translateY(-1px); box-shadow:var(--shadow); }
+  .btn-secondary { background:transparent; color:var(--navy); border:2px solid var(--navy); }
+  .btn-secondary:hover { background:var(--navy); color:var(--white); }
+  .btn-gold { background:var(--gold); color:var(--white); }
+  .btn-gold:hover { background:#b8953f; transform:translateY(-1px); }
+  .btn-green { background:var(--green); color:var(--white); font-size:1.05rem; padding:0.85rem 2.5rem; }
+  .btn-green:hover { background:#219a52; transform:translateY(-1px); box-shadow:var(--shadow-lg); }
+  .btn:disabled { opacity:0.5; cursor:not-allowed; transform:none !important; }
+
+  .fee-badge { display:inline-block; background:var(--navy); color:var(--gold); padding:0.5rem 1.5rem; border-radius:50px; font-weight:700; font-size:1rem; margin-top:0.5rem; letter-spacing:0.03em; }
+
+  .welcome-box { background:linear-gradient(135deg,#1a2744 0%,#2a3f6a 100%); color:var(--white); border-radius:12px; padding:2rem; margin:1.5rem 0; text-align:center; box-shadow:var(--shadow-lg); }
+  .welcome-box h3 { font-family:'Playfair Display',serif; font-size:1.3rem; color:var(--gold); margin-bottom:0.5rem; }
+  .welcome-box p { font-size:0.95rem; color:var(--gold-light); line-height:1.7; }
+
+  .success-msg { display:none; background:#eafaf1; border:1px solid var(--green); border-radius:8px; padding:1rem; color:var(--green); font-weight:600; margin-top:1rem; }
+
+  @keyframes shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-10px)} 40%{transform:translateX(10px)} 60%{transform:translateX(-6px)} 80%{transform:translateX(6px)} }
+  @keyframes spin { to{transform:rotate(360deg)} }
+  .spinner { display:inline-block; width:18px; height:18px; border:3px solid var(--border); border-top-color:var(--navy); border-radius:50%; animation:spin 0.7s linear infinite; }
+
+  footer { text-align:center; padding:2rem 1rem; font-size:0.78rem; color:var(--text-light); }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>Israel of God's Church, W.H.A.</h1>
+  <div class="subtitle">General Educational Workshop Youth Seminar</div>
+  <div class="location">Sycamore, Illinois</div>
+</div>
+
+<div class="form-container">
+
+  <!-- ===== STEP 0: AUTH CODE ===== -->
+  <div id="authGate" style="margin-top:2rem;">
+    <div class="form-section active" style="text-align:center; display:block;">
+      <div style="width:56px;height:56px;background:var(--navy);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1.2rem;font-size:1.5rem;color:var(--gold);">&#128274;</div>
+      <div class="section-title" style="justify-content:center;font-size:1.4rem;">Authorization Required</div>
+      <p style="color:var(--text-light);margin:0.5rem 0 1.5rem;font-size:0.92rem;">This application requires an authorization code from your pastor.<br>Please enter the code you were given to proceed.</p>
+      <div style="max-width:320px;margin:0 auto;">
+        <div class="field-group">
+          <input type="text" id="authCodeInput" placeholder="Enter authorization code" style="text-align:center;font-size:1.1rem;letter-spacing:0.1em;text-transform:uppercase;">
+        </div>
+        <div id="authError" style="display:none;color:var(--red);font-size:0.85rem;font-weight:600;margin-top:0.5rem;">Incorrect code. Please try again or contact your pastor.</div>
+        <button class="btn btn-primary" onclick="checkAuth()" style="width:100%;margin-top:1rem;font-size:1rem;padding:0.85rem;">&#10148; Continue</button>
+      </div>
+      <p style="font-size:0.78rem;color:var(--text-light);margin-top:1.5rem;font-style:italic;">If you do not have a code, please contact your local pastor or church administrator.</p>
+    </div>
+  </div>
+
+  <!-- ===== STEP 0B: NAME & BIRTH YEAR ===== -->
+  <div id="welcomeGate" style="display:none; margin-top:2rem;">
+    <div class="form-section active" style="display:block;">
+      <div class="section-title" style="justify-content:center;font-size:1.3rem;">&#128075; Welcome! Let's Get Started</div>
+      <p style="color:var(--text-light);margin:0.5rem 0 1.5rem;font-size:0.92rem;text-align:center;">Please enter your name and birth year below.<br><em style="color:var(--gold);font-weight:600;">Please make sure to add Brother or Sister before your name so we can address you properly.</em></p>
+      <div style="max-width:420px;margin:0 auto;">
+        <div class="field-group" style="margin-bottom:1rem;">
+          <label>Your Name (e.g. Brother John Smith, Sister Mary Jones) <span class="req">*</span></label>
+          <input type="text" id="welcomeName" placeholder="Brother / Sister First Last">
+        </div>
+        <div class="field-group" style="margin-bottom:1rem;">
+          <label>Birth Year <span class="req">*</span></label>
+          <input type="number" id="birthYear" placeholder="e.g. 2008" min="1930" max="2026">
+        </div>
+        <div id="welcomeError" style="display:none;color:var(--red);font-size:0.85rem;font-weight:600;margin-top:0.5rem;"></div>
+        <button class="btn btn-primary" onclick="processWelcome()" style="width:100%;margin-top:1rem;font-size:1rem;padding:0.85rem;">&#10148; Next</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== STEP 0C: WELCOME MESSAGE ===== -->
+  <div id="welcomeMessage" style="display:none; margin-top:2rem;">
+    <div class="form-section active" style="display:block; text-align:center;">
+      <div class="welcome-box" id="welcomeBoxContent"></div>
+      <button class="btn btn-primary" onclick="startApplication()" style="margin-top:1.5rem;font-size:1.05rem;padding:0.85rem 2.5rem;">&#10148; Click Next to Begin Filling Out Application Form</button>
+    </div>
+  </div>
+
+  <!-- ===== PROGRESS BAR ===== -->
+  <div class="progress-bar" id="progressBar" style="display:none;">
+    <div class="progress-step active" id="prog-1"><div class="dot">1</div><div class="label">Application</div><div class="progress-line"></div></div>
+    <div class="progress-step" id="prog-2"><div class="dot">2</div><div class="label">Emergency</div><div class="progress-line"></div></div>
+    <div class="progress-step" id="prog-3"><div class="dot">3</div><div class="label">Medical</div><div class="progress-line"></div></div>
+    <div class="progress-step" id="prog-4"><div class="dot">4</div><div class="label">Submit</div></div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!--  YOUTH SECTIONS (shown if age <= 18)                          -->
+  <!-- ============================================================ -->
+
+  <!-- YOUTH SECTION 1 -->
+  <div class="form-section" id="youth-section-1">
+    <div class="section-title"><span class="icon">&#9998;</span> Youth Application</div>
+    <div class="section-desc">GEWYS Form 1 &mdash; All fields marked with <span style="color:var(--red)">*</span> are required.</div>
+    <div class="form-row two">
+      <div class="field-group"><label>Date of Pre-Registration <span class="req">*</span></label><input type="date" id="y_preRegDate" required></div>
+      <div class="field-group"><label>Church Location <span class="req">*</span></label><input type="text" id="y_churchLocation" placeholder="e.g. Chicago, IL" required></div>
+    </div>
+    <div class="form-row three">
+      <div class="field-group"><label>Last Name <span class="req">*</span></label><input type="text" id="y_lastName" required></div>
+      <div class="field-group"><label>First Name <span class="req">*</span></label><input type="text" id="y_firstName" required></div>
+      <div class="field-group"><label>Middle Initial</label><input type="text" id="y_middleInitial" maxlength="1"></div>
+    </div>
+    <div class="form-row two">
+      <div class="field-group"><label>Gender <span class="req">*</span></label><select id="y_gender" required><option value="">Select...</option><option value="M">Male</option><option value="F">Female</option></select></div>
+      <div class="field-group"><label>Date of Birth <span class="req">*</span></label><input type="date" id="y_dob" required></div>
+    </div>
+    <div class="form-row two">
+      <div class="field-group"><label>Age <span class="req">*</span></label><input type="number" id="y_age" min="1" max="25" required></div>
+      <div class="field-group"><label>Grade Completed at Start of Youth Seminar <span class="req">*</span></label><input type="text" id="y_schoolGrade" placeholder="e.g. 8th Grade"></div>
+    </div>
+    <div class="field-group" style="margin-bottom:1rem;"><label>Parent / Legal Guardian's Name <span class="req">*</span></label><input type="text" id="y_parentName" required></div>
+    <div class="form-row three">
+      <div class="field-group"><label>Street Address <span class="req">*</span></label><input type="text" id="y_address" required></div>
+      <div class="field-group"><label>City, State <span class="req">*</span></label><input type="text" id="y_cityState" required></div>
+      <div class="field-group"><label>Zip Code <span class="req">*</span></label><input type="text" id="y_zip" required></div>
+    </div>
+    <div class="form-row two">
+      <div class="field-group"><label>Telephone <span class="req">*</span></label><input type="tel" id="y_phone" placeholder="(555) 123-4567" required></div>
+    </div>
+    <div class="subsection">
+      <div class="subsection-title">Emergency Contact (if parents cannot be reached)</div>
+      <div class="field-group" style="margin-bottom:0.75rem;"><label>Name <span class="req">*</span></label><input type="text" id="y_emergName" required></div>
+      <div class="field-group" style="margin-bottom:0.75rem;"><label>Address</label><input type="text" id="y_emergAddress"></div>
+      <div class="field-group"><label>Telephone <span class="req">*</span></label><input type="tel" id="y_emergPhone" required></div>
+    </div>
+    <div class="field-group" style="margin:1rem 0;"><label>Parent / Guardian Email <span class="req">*</span></label><input type="email" id="y_parentEmail" placeholder="parent@email.com" required></div>
+    <div class="consent-box">
+      <label class="inline-label"><input type="checkbox" id="y_fieldTripConsent"> I give permission for my child to go on any field trips off campsite by walking, car or bus.</label>
+    </div>
+    <div style="text-align:center;margin-top:1.2rem;"><span class="fee-badge">Youth Seminar Fee &mdash; $25.00 per camper</span></div>
+    <div class="btn-row" style="justify-content:flex-end;"><button class="btn btn-primary" onclick="goTo(2)">Continue &rarr;</button></div>
+  </div>
+
+  <!-- YOUTH SECTION 2: EMERGENCY -->
+  <div class="form-section" id="youth-section-2">
+    <div class="section-title"><span class="icon">&#9888;</span> Emergency Information</div>
+    <div class="section-desc">GEWYS Form 2 &mdash; Parent / Guardian contact details.</div>
+    <div class="subsection">
+      <div class="subsection-title">Father's Information</div>
+      <div class="form-row two"><div class="field-group"><label>Home Address</label><input type="text" id="y_fatherAddress"></div><div class="field-group"><label>Home Phone</label><input type="tel" id="y_fatherHomePhone"></div></div>
+      <div class="form-row two"><div class="field-group"><label>Employer's Address</label><input type="text" id="y_fatherWorkAddr"></div><div class="field-group"><label>Work Phone</label><input type="tel" id="y_fatherWorkPhone"></div></div>
+    </div>
+    <div class="subsection">
+      <div class="subsection-title">Mother's Information</div>
+      <label class="inline-label" style="margin-bottom:0.75rem;display:flex;"><input type="checkbox" id="y_sameAsFather" onchange="document.getElementById('y_motherAddress').value=this.checked?document.getElementById('y_fatherAddress').value:'';document.getElementById('y_motherAddress').readOnly=this.checked;document.getElementById('y_motherAddress').style.background=this.checked?'#f0ead6':'';"> Same home address as Father</label>
+      <div class="form-row two"><div class="field-group"><label>Home Address</label><input type="text" id="y_motherAddress"></div><div class="field-group"><label>Home Phone</label><input type="tel" id="y_motherHomePhone"></div></div>
+      <div class="form-row two"><div class="field-group"><label>Employer's Address</label><input type="text" id="y_motherWorkAddr"></div><div class="field-group"><label>Work Phone</label><input type="tel" id="y_motherWorkPhone"></div></div>
+    </div>
+    <div class="subsection">
+      <div class="subsection-title">Authorized Pick-Up / Emergency Contacts</div>
+      <div style="margin-bottom:1rem;">
+        <div class="field-group" style="margin-bottom:0.5rem;"><label>Contact 1 &mdash; Name <span class="req">*</span></label><input type="text" id="y_pickup1Name" required></div>
+        <div class="form-row two"><div class="field-group"><label>Address</label><input type="text" id="y_pickup1Addr"></div><div class="field-group"><label>Phone <span class="req">*</span></label><input type="tel" id="y_pickup1Phone" required></div></div>
+      </div>
+      <div>
+        <div class="field-group" style="margin-bottom:0.5rem;"><label>Contact 2 &mdash; Name</label><input type="text" id="y_pickup2Name"></div>
+        <div class="form-row two"><div class="field-group"><label>Address</label><input type="text" id="y_pickup2Addr"></div><div class="field-group"><label>Phone</label><input type="tel" id="y_pickup2Phone"></div></div>
+      </div>
+    </div>
+    <div class="btn-row"><button class="btn btn-secondary" onclick="goTo(1)">&larr; Back</button><button class="btn btn-primary" onclick="goTo(3)">Continue &rarr;</button></div>
+  </div>
+
+  <!-- YOUTH SECTION 3: MEDICAL -->
+  <div class="form-section" id="youth-section-3">
+    <div class="section-title"><span class="icon">&#9764;</span> Medical Information</div>
+    <div class="section-desc">GEWYS Form 2 &mdash; Physician, insurance, immunizations, and health conditions.</div>
+    <div class="form-row two"><div class="field-group"><label>Physician Name <span class="req">*</span></label><input type="text" id="y_physicianName" required></div><div class="field-group"><label>Physician Phone</label><input type="tel" id="y_physicianPhone"></div></div>
+    <div class="field-group" style="margin-bottom:1rem;"><label>Physician Address</label><input type="text" id="y_physicianAddr"></div>
+    <div class="form-row two"><div class="field-group"><label>Insurance Company <span class="req">*</span></label><input type="text" id="y_insuranceName" required></div><div class="field-group"><label>Policy No. <span class="req">*</span></label><input type="text" id="y_insurancePolicyNo" required></div></div>
+    <div class="subsection"><div class="subsection-title">Immunizations</div><div class="field-group"><label>Date of last DPT or Tetanus vaccine</label><input type="date" id="y_immunDate"></div></div>
+    <div class="subsection">
+      <div class="subsection-title">Medical Problems &mdash; Check all that apply</div>
+      <div class="checkbox-grid">
+        <label class="inline-label"><input type="checkbox" name="y_conditions" value="Asthma"> Asthma</label>
+        <label class="inline-label"><input type="checkbox" name="y_conditions" value="Eczema"> Eczema</label>
+        <label class="inline-label"><input type="checkbox" name="y_conditions" value="Diabetes"> Diabetes</label>
+        <label class="inline-label"><input type="checkbox" name="y_conditions" value="Throat Problems"> Throat Problems</label>
+        <label class="inline-label"><input type="checkbox" name="y_conditions" value="Sinus"> Sinus</label>
+        <label class="inline-label"><input type="checkbox" name="y_conditions" value="Hay Fever"> Hay Fever</label>
+        <label class="inline-label"><input type="checkbox" name="y_conditions" value="Heart Problems"> Heart Problems</label>
+        <label class="inline-label"><input type="checkbox" name="y_conditions" value="Seizures"> Seizures</label>
+        <label class="inline-label"><input type="checkbox" name="y_conditions" value="Headaches"> Headaches</label>
+        <label class="inline-label"><input type="checkbox" name="y_conditions" value="ADD"> ADD</label>
+        <label class="inline-label"><input type="checkbox" name="y_conditions" value="Rashes"> Rashes</label>
+      </div>
+      <div class="field-group" style="margin-top:0.75rem;"><label>Other</label><input type="text" id="y_otherConditions"></div>
+    </div>
+    <div class="subsection"><div class="subsection-title">Medications</div><div class="field-group"><label>List all current medications</label><textarea id="y_medications" placeholder="Enter each medication..."></textarea></div></div>
+    <div class="subsection"><div class="subsection-title">Allergies</div><div class="field-group"><label>List all allergies (including food)</label><textarea id="y_allergies" placeholder="Enter each allergy..."></textarea></div></div>
+    <div class="subsection"><div class="subsection-title">Disabilities / Handicaps</div><div class="field-group"><label>Physical challenges or limitations</label><textarea id="y_disabilities"></textarea></div></div>
+    <div class="subsection"><div class="subsection-title">Recent Injuries</div><div class="field-group"><label>Broken bones, sprains, etc.</label><textarea id="y_recentInjuries"></textarea></div></div>
+    <div class="consent-box">
+      <p style="margin-bottom:0.75rem;">I, the parent/legal guardian of the above-named youth, hereby authorize medical treatment for my child and give permission to treat him/her in the event I cannot be contacted. I understand I will be financially responsible for all costs. The Israel of God's Church, W.H.A., and GEWYS will not be held liable for medical expenses.</p>
+      <label class="inline-label"><input type="checkbox" id="y_medicalConsent" required><strong>I agree to the above <span style="color:var(--red)">*</span></strong></label>
+    </div>
+    <div class="form-row two" style="margin-top:1rem;"><div class="field-group"><label>Parent / Guardian Signature <span class="req">*</span></label><input type="text" id="y_signatureName" required></div><div class="field-group"><label>Date <span class="req">*</span></label><input type="date" id="y_signatureDate" required></div></div>
+    <div class="btn-row"><button class="btn btn-secondary" onclick="goTo(2)">&larr; Back</button><button class="btn btn-primary" onclick="goTo(4)">Review &amp; Submit &rarr;</button></div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!--  STAFF SECTIONS (shown if age > 21)                           -->
+  <!-- ============================================================ -->
+
+  <!-- STAFF SECTION 1 -->
+  <div class="form-section" id="staff-section-1">
+    <div class="section-title"><span class="icon">&#9998;</span> Staff Application</div>
+    <div class="section-desc">GEWYS Form 1A &mdash; Staff Member. All fields marked with <span style="color:var(--red)">*</span> are required.</div>
+    <div class="form-row two">
+      <div class="field-group"><label>Date of Pre-Registration <span class="req">*</span></label><input type="date" id="s_preRegDate" required></div>
+      <div class="field-group"><label>Church Location <span class="req">*</span></label><input type="text" id="s_churchLocation" placeholder="e.g. Chicago, IL" required></div>
+    </div>
+    <div class="form-row three">
+      <div class="field-group"><label>Last Name <span class="req">*</span></label><input type="text" id="s_lastName" required></div>
+      <div class="field-group"><label>First Name <span class="req">*</span></label><input type="text" id="s_firstName" required></div>
+      <div class="field-group"><label>Middle Initial</label><input type="text" id="s_middleInitial" maxlength="1"></div>
+    </div>
+    <div class="form-row two">
+      <div class="field-group"><label>Gender <span class="req">*</span></label><select id="s_gender" required><option value="">Select...</option><option value="M">Male</option><option value="F">Female</option></select></div>
+      <div class="field-group"><label>Date of Birth <span class="req">*</span></label><input type="date" id="s_dob" required></div>
+    </div>
+    <div class="form-row two">
+      <div class="field-group"><label>Age <span class="req">*</span></label><input type="number" id="s_age" min="18" required></div>
+      <div class="field-group"><label>Spouse's Name (if married)</label><input type="text" id="s_spouseName"></div>
+    </div>
+    <div class="form-row three">
+      <div class="field-group"><label>Street Address <span class="req">*</span></label><input type="text" id="s_address" required></div>
+      <div class="field-group"><label>City, State <span class="req">*</span></label><input type="text" id="s_cityState" required></div>
+      <div class="field-group"><label>Zip Code <span class="req">*</span></label><input type="text" id="s_zip" required></div>
+    </div>
+    <div class="form-row two"><div class="field-group"><label>Telephone <span class="req">*</span></label><input type="tel" id="s_phone" required></div></div>
+    <div class="subsection">
+      <div class="subsection-title">Emergency Contact</div>
+      <div class="field-group" style="margin-bottom:0.75rem;"><label>Name <span class="req">*</span></label><input type="text" id="s_emergName" required></div>
+      <div class="field-group" style="margin-bottom:0.75rem;"><label>Address</label><input type="text" id="s_emergAddress"></div>
+      <div class="field-group"><label>Telephone <span class="req">*</span></label><input type="tel" id="s_emergPhone" required></div>
+    </div>
+    <div class="field-group" style="margin:1rem 0;"><label>Your Email <span class="req">*</span></label><input type="email" id="s_applicantEmail" placeholder="your@email.com" required></div>
+    <div style="text-align:center;margin-top:1.2rem;"><span class="fee-badge">Staff Seminar Fee &mdash; $30.00 per Staff member</span></div>
+    <div class="btn-row" style="justify-content:flex-end;"><button class="btn btn-primary" onclick="goTo(2)">Continue &rarr;</button></div>
+  </div>
+
+  <!-- STAFF SECTION 2: EMERGENCY -->
+  <div class="form-section" id="staff-section-2">
+    <div class="section-title"><span class="icon">&#9888;</span> Emergency Information</div>
+    <div class="section-desc">GEWYS Form 2A &mdash; Emergency contacts and medical care authorization.</div>
+    <div class="form-row two"><div class="field-group"><label>Home Address</label><input type="text" id="s_homeAddress2"></div><div class="field-group"><label>Home Phone</label><input type="tel" id="s_homePhone2"></div></div>
+    <div class="form-row two"><div class="field-group"><label>Spouse's Employer Address</label><input type="text" id="s_spouseWorkAddr"></div><div class="field-group"><label>Spouse Work Phone</label><input type="tel" id="s_spouseWorkPhone"></div></div>
+    <div class="subsection">
+      <div class="subsection-title">Emergency Contacts</div>
+      <div style="margin-bottom:1rem;">
+        <div class="field-group" style="margin-bottom:0.5rem;"><label>Contact 1 &mdash; Name <span class="req">*</span></label><input type="text" id="s_contact1Name" required></div>
+        <div class="form-row two"><div class="field-group"><label>Address</label><input type="text" id="s_contact1Addr"></div><div class="field-group"><label>Phone <span class="req">*</span></label><input type="tel" id="s_contact1Phone" required></div></div>
+      </div>
+      <div>
+        <div class="field-group" style="margin-bottom:0.5rem;"><label>Contact 2 &mdash; Name</label><input type="text" id="s_contact2Name"></div>
+        <div class="form-row two"><div class="field-group"><label>Address</label><input type="text" id="s_contact2Addr"></div><div class="field-group"><label>Phone</label><input type="tel" id="s_contact2Phone"></div></div>
+      </div>
+    </div>
+    <div class="form-row two"><div class="field-group"><label>Physician Name <span class="req">*</span></label><input type="text" id="s_physicianName" required></div><div class="field-group"><label>Physician Phone</label><input type="tel" id="s_physicianPhone"></div></div>
+    <div class="field-group" style="margin-bottom:1rem;"><label>Physician Address</label><input type="text" id="s_physicianAddr"></div>
+    <div class="form-row two"><div class="field-group"><label>Insurance Company <span class="req">*</span></label><input type="text" id="s_insuranceName" required></div><div class="field-group"><label>Policy No. <span class="req">*</span></label><input type="text" id="s_insurancePolicyNo" required></div></div>
+    <div class="consent-box">
+      <p style="margin-bottom:0.75rem;">I hereby authorize medical treatment for myself and give permission to be medically treated in the event I am unable to give my verbal consent. I understand I will be financially responsible for all costs. The Israel of God's Church, W.H.A., and GEWYS will not be held liable for medical expenses.</p>
+      <label class="inline-label"><input type="checkbox" id="s_medicalConsent" required><strong>I agree <span style="color:var(--red)">*</span></strong></label>
+    </div>
+    <div class="btn-row"><button class="btn btn-secondary" onclick="goTo(1)">&larr; Back</button><button class="btn btn-primary" onclick="goTo(3)">Continue &rarr;</button></div>
+  </div>
+
+  <!-- STAFF SECTION 3: MEDICAL -->
+  <div class="form-section" id="staff-section-3">
+    <div class="section-title"><span class="icon">&#9764;</span> Medical Information</div>
+    <div class="section-desc">GEWYS Form 2A &mdash; Immunizations, conditions, medications, and allergies.</div>
+    <div class="subsection">
+      <div class="subsection-title">Immunizations &mdash; Tetanus</div>
+      <div class="form-row two">
+        <div class="field-group"><label>Status</label><select id="s_tetanusStatus"><option value="">Select...</option><option value="Within 5 years">Within the past 5 years</option><option value="Within 10 years">Within the past 10 years</option><option value="Unknown">Unknown</option></select></div>
+        <div class="field-group"><label>Approximate Date (if known)</label><input type="date" id="s_tetanusDate"></div>
+      </div>
+    </div>
+    <div class="subsection">
+      <div class="subsection-title">Medical Problems &mdash; Check all that apply</div>
+      <div class="checkbox-grid">
+        <label class="inline-label"><input type="checkbox" name="s_conditions" value="Asthma"> Asthma</label>
+        <label class="inline-label"><input type="checkbox" name="s_conditions" value="Arthritis"> Arthritis</label>
+        <label class="inline-label"><input type="checkbox" name="s_conditions" value="Diabetes"> Diabetes</label>
+        <label class="inline-label"><input type="checkbox" name="s_conditions" value="Hay Fever"> Hay Fever</label>
+        <label class="inline-label"><input type="checkbox" name="s_conditions" value="Sinus"> Sinus</label>
+        <label class="inline-label"><input type="checkbox" name="s_conditions" value="Headaches/Migraines"> Headaches/Migraines</label>
+        <label class="inline-label"><input type="checkbox" name="s_conditions" value="Angina"> Angina</label>
+        <label class="inline-label"><input type="checkbox" name="s_conditions" value="High Blood Pressure"> High Blood Pressure</label>
+        <label class="inline-label"><input type="checkbox" name="s_conditions" value="Heart Problems"> Heart Problems</label>
+        <label class="inline-label"><input type="checkbox" name="s_conditions" value="Thyroid Problems"> Thyroid Problems</label>
+        <label class="inline-label"><input type="checkbox" name="s_conditions" value="Throat Problems"> Throat Problems</label>
+      </div>
+      <div class="field-group" style="margin-top:0.75rem;"><label>Other</label><input type="text" id="s_otherConditions"></div>
+    </div>
+    <div class="subsection"><div class="subsection-title">Medications</div><div class="field-group"><label>List all current medications</label><textarea id="s_medications"></textarea></div></div>
+    <div class="subsection"><div class="subsection-title">Allergies</div><div class="field-group"><label>List all allergies (including food)</label><textarea id="s_allergies"></textarea></div></div>
+    <div class="subsection"><div class="subsection-title">Disabilities / Handicaps</div><div class="field-group"><label>Physical challenges or limitations</label><textarea id="s_disabilities"></textarea></div></div>
+    <div class="form-row two" style="margin-top:1rem;"><div class="field-group"><label>Signature <span class="req">*</span></label><input type="text" id="s_signatureName" required></div><div class="field-group"><label>Date <span class="req">*</span></label><input type="date" id="s_signatureDate" required></div></div>
+    <div class="btn-row"><button class="btn btn-secondary" onclick="goTo(2)">&larr; Back</button><button class="btn btn-primary" onclick="goTo(4)">Review &amp; Submit &rarr;</button></div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!--  SECTION 4: REVIEW & SUBMIT (shared)                          -->
+  <!-- ============================================================ -->
+  <div class="form-section" id="section-4">
+    <div class="section-title"><span class="icon">&#10003;</span> Review &amp; Submit</div>
+    <div class="section-desc">Review your information below, then submit your application.</div>
+    <div id="reviewContent" style="font-size:0.9rem;line-height:1.8;"></div>
+    <div style="text-align:center;margin-top:2rem;">
+      <button class="btn btn-gold" onclick="generatePDF(false)" style="font-size:1.05rem;padding:0.85rem 2.5rem;">&#128196; Download Application as PDF</button>
+    </div>
+    <div style="margin-top:2rem;padding-top:1.5rem;border-top:2px solid var(--cream-dark);text-align:center;">
+      <div class="section-title" style="justify-content:center;font-size:1.1rem;margin-bottom:0.5rem;"><span class="icon" style="width:24px;height:24px;font-size:0.75rem;">&#9993;</span> Submit Application</div>
+      <p style="font-size:0.92rem;color:var(--text);margin-bottom:1.5rem;">When you click <strong>Submit Application</strong>, your completed application will be automatically generated as a PDF and emailed to the GEWYS administration for review.</p>
+      <input type="hidden" id="recipientEmail" value="iogcyouthseminar@gmail.com">
+      <button class="btn btn-green" id="sendBtn" onclick="sendViaEmail()" style="padding:1rem 3rem;font-size:1.1rem;">&#10148; Submit Application</button>
+      <div id="sendingMsg" style="display:none;text-align:center;margin-top:1rem;"><div style="display:inline-flex;align-items:center;gap:0.6rem;background:var(--cream);padding:0.75rem 1.5rem;border-radius:8px;font-weight:600;color:var(--navy);"><span class="spinner"></span> Generating PDF and sending application...</div></div>
+      <div class="success-msg" id="successMsg">&#10003; Application submitted successfully! Your application has been sent to GEWYS administration for review.</div>
+      <div id="errorMsg" style="display:none;background:#fef0ef;border:1px solid var(--red);border-radius:8px;padding:1rem;color:var(--red);font-weight:600;margin-top:1rem;"></div>
+    </div>
+    <div class="btn-row" style="margin-top:2rem;"><button class="btn btn-secondary" onclick="goTo(3)">&larr; Back to Edit</button></div>
+  </div>
+
+</div>
+
+<footer>GEWYS Application &mdash; Israel of God's Church, W.H.A. &mdash; Sycamore, Illinois</footer>
+
+<script>
+  // =====================================================
+  // ADMIN CONFIG
+  // =====================================================
+  const AUTH_CODE = "GEWYS2026";
+  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzmE18hYg0CE2xjECnwhceedMGo3kmJ7JSIQZL3SzBOzeksmV-VMch9n7BnV6JmbnCu/exec";
+
+  let appType = ''; // 'youth' or 'staff'
+  let welcomeNameValue = '';
+  let currentSection = 1;
+
+  // AUTH
+  function checkAuth() {
+    const input = document.getElementById('authCodeInput').value.trim().toUpperCase();
+    if (input === AUTH_CODE.toUpperCase()) {
+      document.getElementById('authGate').style.display = 'none';
+      document.getElementById('welcomeGate').style.display = 'block';
+    } else {
+      document.getElementById('authError').style.display = 'block';
+      document.getElementById('authCodeInput').classList.add('error');
+      const gate = document.getElementById('authGate');
+      gate.style.animation = 'none'; gate.offsetHeight; gate.style.animation = 'shake 0.4s ease';
+    }
+  }
+  document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('authCodeInput').addEventListener('keypress', function(e) { if (e.key==='Enter') checkAuth(); });
+    document.getElementById('birthYear').addEventListener('keypress', function(e) { if (e.key==='Enter') processWelcome(); });
+    // Clear error styling when user starts typing
+    document.addEventListener('input', function(e) {
+      if (e.target.classList.contains('error')) e.target.classList.remove('error');
+    });
+  });
+
+  // WELCOME / ROUTING
+  function processWelcome() {
+    const name = document.getElementById('welcomeName').value.trim();
+    const yearStr = document.getElementById('birthYear').value.trim();
+    const errEl = document.getElementById('welcomeError');
+
+    if (!name || !yearStr) { errEl.textContent = 'Please enter both your name and birth year.'; errEl.style.display = 'block'; return; }
+
+    const birthYear = parseInt(yearStr);
+    const currentYear = new Date().getFullYear();
+    const age = currentYear - birthYear;
+
+    if (age < 5 || age > 100) { errEl.textContent = 'Please enter a valid birth year.'; errEl.style.display = 'block'; return; }
+
+    errEl.style.display = 'none';
+    welcomeNameValue = name;
+
+    const box = document.getElementById('welcomeBoxContent');
+
+    if (age <= 18) {
+      appType = 'youth';
+      box.innerHTML = '<h3>Welcome to the Summer Youth Seminar Pre-Registration!</h3>'
+        + '<p style="font-size:1.1rem;color:#fff;margin:0.5rem 0 0.3rem;">Hello, <strong>' + name + '</strong>!</p>'
+        + '<p>We are glad you are able to make it this year. Please click next to begin filling out your application form.</p>';
+    } else {
+      appType = 'staff';
+      box.innerHTML = '<h3>Welcome to the Summer Youth Seminar Pre-Registration!</h3>'
+        + '<p style="font-size:1.1rem;color:#fff;margin:0.5rem 0 0.3rem;">Hello, <strong>' + name + '</strong>!</p>'
+        + '<p>We are glad you are joining us this year to support and encourage our youth. Please click next to begin filling out your application form.</p>';
+    }
+
+    document.getElementById('welcomeGate').style.display = 'none';
+    document.getElementById('welcomeMessage').style.display = 'block';
+  }
+
+  function startApplication() {
+    document.getElementById('welcomeMessage').style.display = 'none';
+    document.getElementById('progressBar').style.display = 'flex';
+    document.getElementById((appType === 'youth' ? 'youth' : 'staff') + '-section-1').classList.add('active');
+    currentSection = 1;
+  }
+
+  // VALIDATION — Required fields per section
+  const requiredFields = {
+    youth: {
+      1: ['y_preRegDate','y_churchLocation','y_lastName','y_firstName','y_gender','y_dob','y_age','y_schoolGrade','y_parentName','y_address','y_cityState','y_zip','y_phone','y_emergName','y_emergPhone','y_parentEmail'],
+      2: ['y_fatherAddress','y_fatherHomePhone','y_motherAddress','y_motherHomePhone','y_pickup1Name','y_pickup1Phone'],
+      3: ['y_physicianName','y_physicianAddr','y_physicianPhone','y_insuranceName','y_insurancePolicyNo','y_medications','y_allergies','y_disabilities','y_recentInjuries','y_signatureName','y_signatureDate']
+    },
+    staff: {
+      1: ['s_preRegDate','s_churchLocation','s_lastName','s_firstName','s_gender','s_dob','s_age','s_address','s_cityState','s_zip','s_phone','s_emergName','s_emergPhone','s_applicantEmail'],
+      2: ['s_homeAddress2','s_homePhone2','s_contact1Name','s_contact1Phone','s_physicianName','s_physicianAddr','s_physicianPhone','s_insuranceName','s_insurancePolicyNo'],
+      3: ['s_medications','s_allergies','s_disabilities','s_signatureName','s_signatureDate']
+    }
+  };
+
+  function validateSection(sectionNum) {
+    if (sectionNum > 3) return true; // review page, no validation
+    const fields = requiredFields[appType][sectionNum] || [];
+    let firstError = null;
+    let missingCount = 0;
+
+    // Clear previous errors
+    document.querySelectorAll('.field-error-msg').forEach(el => el.remove());
+    document.querySelectorAll('.error').forEach(el => el.classList.remove('error'));
+
+    for (const fieldId of fields) {
+      const el = document.getElementById(fieldId);
+      if (!el) continue;
+      const val = el.value.trim();
+      if (!val) {
+        el.classList.add('error');
+        missingCount++;
+        if (!firstError) firstError = el;
+      }
+    }
+
+    // Check required checkboxes
+    if (appType === 'youth' && sectionNum === 3) {
+      const consent = document.getElementById('y_medicalConsent');
+      if (!consent.checked) { missingCount++; if (!firstError) firstError = consent; }
+    }
+    if (appType === 'staff' && sectionNum === 2) {
+      const consent = document.getElementById('s_medicalConsent');
+      if (!consent.checked) { missingCount++; if (!firstError) firstError = consent; }
+    }
+
+    if (missingCount > 0) {
+      if (firstError) firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      alert('Please fill in all required fields. If a field does not apply, enter "N/A".');
+      return false;
+    }
+    return true;
+  }
+
+  // NAVIGATION
+  function goTo(n) {
+    // Validate current section before moving forward
+    if (n > currentSection && !validateSection(currentSection)) return;
+
+    const prefix = appType === 'youth' ? 'youth' : 'staff';
+    // Hide current
+    if (currentSection <= 3) {
+      document.getElementById(prefix + '-section-' + currentSection).classList.remove('active');
+    } else {
+      document.getElementById('section-4').classList.remove('active');
+    }
+    // Show target
+    if (n <= 3) {
+      document.getElementById(prefix + '-section-' + n).classList.add('active');
+    } else {
+      document.getElementById('section-4').classList.add('active');
+      buildReview();
+    }
+    // Update progress
+    for (let i = 1; i <= 4; i++) {
+      const p = document.getElementById('prog-' + i);
+      p.classList.remove('active', 'completed');
+      if (i < n) p.classList.add('completed');
+      if (i === n) p.classList.add('active');
+    }
+    currentSection = n;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function gv(id) { const el = document.getElementById(id); return el ? el.value.trim() : ''; }
+
+  // BUILD REVIEW
+  function buildReview() {
+    let html = '';
+    if (appType === 'youth') {
+      const conds = []; document.querySelectorAll('input[name="y_conditions"]:checked').forEach(c => conds.push(c.value));
+      html = `<div class="subsection"><div class="subsection-title">Youth Application (Form 1)</div>
+        <p><strong>Pre-Registration Date:</strong> ${gv('y_preRegDate')}</p>
+        <p><strong>Church Location:</strong> ${gv('y_churchLocation')}</p>
+        <p><strong>Name:</strong> ${gv('y_lastName')}, ${gv('y_firstName')} ${gv('y_middleInitial')}</p>
+        <p><strong>Gender:</strong> ${gv('y_gender')} &nbsp;|&nbsp; <strong>DOB:</strong> ${gv('y_dob')} &nbsp;|&nbsp; <strong>Age:</strong> ${gv('y_age')}</p>
+        <p><strong>Grade Completed:</strong> ${gv('y_schoolGrade')}</p>
+        <p><strong>Parent / Guardian:</strong> ${gv('y_parentName')}</p>
+        <p><strong>Parent / Guardian Email:</strong> ${gv('y_parentEmail')}</p>
+        <p><strong>Address:</strong> ${gv('y_address')}, ${gv('y_cityState')} ${gv('y_zip')}</p>
+        <p><strong>Phone:</strong> ${gv('y_phone')}</p>
+        <p><strong>Emergency Contact:</strong> ${gv('y_emergName')} &mdash; ${gv('y_emergPhone')}</p>
+        <p><strong>Emergency Address:</strong> ${gv('y_emergAddress') || 'N/A'}</p>
+        <p><strong>Field Trip Permission:</strong> ${document.getElementById('y_fieldTripConsent').checked ? 'Yes' : 'No'}</p></div>
+        <div class="subsection"><div class="subsection-title">Emergency Information (Form 2)</div>
+        <p><strong>Father's Address:</strong> ${gv('y_fatherAddress') || 'N/A'} &nbsp;|&nbsp; <strong>Home Phone:</strong> ${gv('y_fatherHomePhone') || 'N/A'}</p>
+        <p><strong>Father's Work:</strong> ${gv('y_fatherWorkAddr') || 'N/A'} &nbsp;|&nbsp; <strong>Work Phone:</strong> ${gv('y_fatherWorkPhone') || 'N/A'}</p>
+        <p><strong>Mother's Address:</strong> ${gv('y_motherAddress') || 'N/A'} &nbsp;|&nbsp; <strong>Home Phone:</strong> ${gv('y_motherHomePhone') || 'N/A'}</p>
+        <p><strong>Mother's Work:</strong> ${gv('y_motherWorkAddr') || 'N/A'} &nbsp;|&nbsp; <strong>Work Phone:</strong> ${gv('y_motherWorkPhone') || 'N/A'}</p>
+        <p><strong>Pickup Contact 1:</strong> ${gv('y_pickup1Name')} &mdash; ${gv('y_pickup1Phone')}</p>
+        <p><strong>Pickup Contact 2:</strong> ${gv('y_pickup2Name') || 'N/A'} &mdash; ${gv('y_pickup2Phone') || 'N/A'}</p></div>
+        <div class="subsection"><div class="subsection-title">Medical Information (Form 2)</div>
+        <p><strong>Physician:</strong> ${gv('y_physicianName')} &mdash; ${gv('y_physicianPhone') || 'N/A'}</p>
+        <p><strong>Physician Address:</strong> ${gv('y_physicianAddr') || 'N/A'}</p>
+        <p><strong>Insurance:</strong> ${gv('y_insuranceName')} &mdash; Policy: ${gv('y_insurancePolicyNo')}</p>
+        <p><strong>Last DPT/Tetanus:</strong> ${gv('y_immunDate') || 'N/A'}</p>
+        <p><strong>Medical Conditions:</strong> ${conds.length ? conds.join(', ') : 'None'} ${gv('y_otherConditions') ? ', ' + gv('y_otherConditions') : ''}</p>
+        <p><strong>Medications:</strong> ${gv('y_medications') || 'None'}</p>
+        <p><strong>Allergies:</strong> ${gv('y_allergies') || 'None'}</p>
+        <p><strong>Disabilities:</strong> ${gv('y_disabilities') || 'None'}</p>
+        <p><strong>Recent Injuries:</strong> ${gv('y_recentInjuries') || 'None'}</p>
+        <p><strong>Medical Consent:</strong> ${document.getElementById('y_medicalConsent').checked ? 'Agreed' : 'Not agreed'}</p>
+        <p><strong>Signed by:</strong> ${gv('y_signatureName')} on ${gv('y_signatureDate')}</p></div>`;
+    } else {
+      const conds = []; document.querySelectorAll('input[name="s_conditions"]:checked').forEach(c => conds.push(c.value));
+      html = `<div class="subsection"><div class="subsection-title">Staff Application (Form 1A)</div>
+        <p><strong>Pre-Registration Date:</strong> ${gv('s_preRegDate')}</p>
+        <p><strong>Church Location:</strong> ${gv('s_churchLocation')}</p>
+        <p><strong>Name:</strong> ${gv('s_lastName')}, ${gv('s_firstName')} ${gv('s_middleInitial')}</p>
+        <p><strong>Gender:</strong> ${gv('s_gender')} &nbsp;|&nbsp; <strong>DOB:</strong> ${gv('s_dob')} &nbsp;|&nbsp; <strong>Age:</strong> ${gv('s_age')}</p>
+        <p><strong>Spouse:</strong> ${gv('s_spouseName') || 'N/A'}</p>
+        <p><strong>Email:</strong> ${gv('s_applicantEmail')}</p>
+        <p><strong>Address:</strong> ${gv('s_address')}, ${gv('s_cityState')} ${gv('s_zip')}</p>
+        <p><strong>Phone:</strong> ${gv('s_phone')}</p>
+        <p><strong>Emergency Contact:</strong> ${gv('s_emergName')} &mdash; ${gv('s_emergPhone')}</p></div>
+        <div class="subsection"><div class="subsection-title">Emergency & Medical (Form 2A)</div>
+        <p><strong>Home Address:</strong> ${gv('s_homeAddress2') || 'N/A'} &nbsp;|&nbsp; <strong>Phone:</strong> ${gv('s_homePhone2') || 'N/A'}</p>
+        <p><strong>Spouse's Work:</strong> ${gv('s_spouseWorkAddr') || 'N/A'} &nbsp;|&nbsp; <strong>Phone:</strong> ${gv('s_spouseWorkPhone') || 'N/A'}</p>
+        <p><strong>Emergency Contact 1:</strong> ${gv('s_contact1Name')} &mdash; ${gv('s_contact1Phone')}</p>
+        <p><strong>Emergency Contact 2:</strong> ${gv('s_contact2Name') || 'N/A'} &mdash; ${gv('s_contact2Phone') || 'N/A'}</p>
+        <p><strong>Physician:</strong> ${gv('s_physicianName')} &mdash; ${gv('s_physicianPhone') || 'N/A'}</p>
+        <p><strong>Insurance:</strong> ${gv('s_insuranceName')} &mdash; Policy: ${gv('s_insurancePolicyNo')}</p>
+        <p><strong>Medical Consent:</strong> ${document.getElementById('s_medicalConsent').checked ? 'Agreed' : 'Not agreed'}</p></div>
+        <div class="subsection"><div class="subsection-title">Medical Details (Form 2A)</div>
+        <p><strong>Tetanus:</strong> ${gv('s_tetanusStatus') || 'N/A'} &mdash; ${gv('s_tetanusDate') || 'Date unknown'}</p>
+        <p><strong>Medical Conditions:</strong> ${conds.length ? conds.join(', ') : 'None'} ${gv('s_otherConditions') ? ', ' + gv('s_otherConditions') : ''}</p>
+        <p><strong>Medications:</strong> ${gv('s_medications') || 'None'}</p>
+        <p><strong>Allergies:</strong> ${gv('s_allergies') || 'None'}</p>
+        <p><strong>Disabilities:</strong> ${gv('s_disabilities') || 'None'}</p>
+        <p><strong>Signed by:</strong> ${gv('s_signatureName')} on ${gv('s_signatureDate')}</p></div>`;
+    }
+    document.getElementById('reviewContent').innerHTML = html;
+  }
+
+  // PDF GENERATION
+  function generatePDF(returnBase64) {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF('p','mm','letter');
+    const W=215.9, M=18, PW=W-2*M;
+    let y = M;
+    const p = appType === 'youth' ? 'y_' : 's_';
+
+    function hdr(doc, lbl) { doc.setFont('helvetica','bold'); doc.setFontSize(13); doc.text("ISRAEL OF GOD'S CHURCH, W.H.A.",W/2,y,{align:'center'}); y+=6; doc.setFontSize(11); doc.text("GENERAL EDUCATIONAL WORKSHOP YOUTH SEMINAR",W/2,y,{align:'center'}); y+=5; doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.text("SYCAMORE, ILLINOIS",W/2,y,{align:'center'}); y+=7; doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.text(lbl,W/2,y,{align:'center'}); y+=8; }
+    function lb(t,x,yy){doc.setFont('helvetica','bold');doc.setFontSize(8);doc.text(t,x,yy);}
+    function vl(t,x,yy){doc.setFont('helvetica','normal');doc.setFontSize(9);doc.text(t||'',x,yy);}
+    function ln(x1,yy,x2){doc.setDrawColor(150);doc.setLineWidth(0.3);doc.line(x1,yy,x2,yy);}
+    function fl(l,v,x,yy,xe){lb(l,x,yy);const lw=doc.getTextWidth(l)+2;ln(x+lw,yy,xe);vl(v,x+lw+1,yy-0.5);}
+
+    const formLabel = appType==='youth' ? 'APPLICATION - Youth' : 'APPLICATION - Staff';
+    hdr(doc, formLabel);
+
+    fl("Date of Pre-Registration:", gv(p+'preRegDate'), M, y, M+PW); y+=6;
+    fl("Church Location:", gv(p+'churchLocation'), M, y, M+PW); y+=7;
+
+    lb("Name:", M, y); vl(gv(p+'lastName')+", "+gv(p+'firstName')+" "+gv(p+'middleInitial'), M+12, y-0.5); ln(M+11,y,M+PW); y+=6;
+    fl("Gender:", gv(p+'gender'), M, y, M+40);
+    fl("Date of Birth:", gv(p+'dob'), M+50, y, M+120);
+    fl("Age:", gv(p+'age'), M+125, y, M+PW); y+=7;
+
+    if (appType==='youth') {
+      fl("Parent/Guardian:", gv('y_parentName'), M, y, M+PW); y+=6;
+      fl("Grade:", gv('y_schoolGrade'), M, y, M+PW); y+=6;
+    } else {
+      fl("Spouse:", gv('s_spouseName')||'N/A', M, y, M+PW); y+=6;
+    }
+
+    fl("Address:", gv(p+'address')+", "+gv(p+'cityState')+" "+gv(p+'zip'), M, y, M+PW); y+=6;
+    fl("Telephone:", gv(p+'phone'), M, y, M+PW); y+=8;
+
+    lb("Emergency Contact:", M, y); y+=5;
+    fl("Name:", gv(p+'emergName'), M, y, M+PW); y+=5;
+    fl("Address:", gv(p+'emergAddress'), M, y, M+PW); y+=5;
+    fl("Phone:", gv(p+'emergPhone'), M, y, M+PW); y+=8;
+
+    fl("Signature:", gv(p+'signatureName'), M, y, M+120);
+    fl("Date:", gv(p+'signatureDate'), M+125, y, M+PW); y+=8;
+
+    const fee = appType==='youth' ? '$25.00 per camper' : '$30.00 per Staff member';
+    doc.setFont('helvetica','bold'); doc.setFontSize(10);
+    doc.text("YOUTH SEMINAR FEE - "+fee, W/2, y, {align:'center'}); y+=5;
+    doc.setFontSize(7); doc.setFont('helvetica','normal');
+    doc.text(appType==='youth'?"GEWYS Form 1 (N-3/14)":"GEWYS Form 1A (N-3/14)", M, y);
+
+    // Page 2: Medical
+    doc.addPage(); y=M;
+    hdr(doc, appType==='youth'?'INFORMATION - Youth':'INFORMATION - Staff Member');
+
+    fl("Physician:", gv(p+'physicianName'), M, y, M+PW); y+=5;
+    fl("Physician Phone:", gv(p+'physicianPhone'), M, y, M+PW); y+=5;
+    fl("Insurance:", gv(p+'insuranceName'), M, y, M+PW); y+=5;
+    fl("Policy No.:", gv(p+'insurancePolicyNo'), M, y, M+PW); y+=8;
+
+    const condName = appType==='youth'?'y_conditions':'s_conditions';
+    const conds=[]; document.querySelectorAll('input[name="'+condName+'"]:checked').forEach(c=>conds.push(c.value));
+    lb("Medical Conditions:", M, y); y+=5;
+    doc.setFont('helvetica','normal'); doc.setFontSize(8);
+    doc.text(conds.length?conds.join(', '):'None', M, y); y+=7;
+
+    fl("Medications:", gv(p+'medications')||'None', M, y, M+PW); y+=7;
+    fl("Allergies:", gv(p+'allergies')||'None', M, y, M+PW); y+=7;
+    fl("Disabilities:", gv(p+'disabilities')||'None', M, y, M+PW); y+=8;
+
+    if (appType==='youth') {
+      fl("Recent Injuries:", gv('y_recentInjuries')||'None', M, y, M+PW); y+=8;
+    }
+
+    fl("Signature:", gv(p+'signatureName'), M, y, M+120);
+    fl("Date:", gv(p+'signatureDate'), M+125, y, M+PW); y+=6;
+    doc.setFontSize(7);
+    doc.text(appType==='youth'?"GEWYS Form 2 (N-3/14)":"GEWYS Form 2A (N-3/14)", M, y);
+
+    const fileName = "GEWYS_Application_" + (gv(p+'lastName')||'Applicant') + "_" + (gv(p+'firstName')||'') + ".pdf";
+    if (returnBase64) { return { base64: doc.output('datauristring').split(',')[1], fileName }; }
+    doc.save(fileName);
+    return { fileName };
+  }
+
+  // SEND
+  async function sendViaEmail() {
+    const email = gv('recipientEmail');
+    if (APPS_SCRIPT_URL==="PASTE_YOUR_GOOGLE_APPS_SCRIPT_URL_HERE") { alert('Admin: paste your Apps Script URL in the HTML file.'); return; }
+
+    const sendBtn=document.getElementById('sendBtn'), sendingMsg=document.getElementById('sendingMsg'), successMsg=document.getElementById('successMsg'), errorMsg=document.getElementById('errorMsg');
+    sendBtn.disabled=true; sendingMsg.style.display='block'; successMsg.style.display='none'; errorMsg.style.display='none';
+
+    try {
+      const {base64,fileName} = generatePDF(true);
+      const p = appType==='youth'?'y_':'s_';
+      const youthName = gv(p+'firstName')+' '+gv(p+'lastName');
+
+      await fetch(APPS_SCRIPT_URL, {
+        method:'POST', mode:'no-cors',
+        headers:{'Content-Type':'application/x-www-form-urlencoded'},
+        body: new URLSearchParams({
+          email, fileName, pdfBase64:base64, youthName,
+          welcomeName: welcomeNameValue,
+          churchLocation: gv(p+'churchLocation'),
+          preRegDate: gv(p+'preRegDate'),
+          age: gv(p+'age'),
+          gender: gv(p+'gender'),
+          schoolGrade: appType==='youth'?gv('y_schoolGrade'):'Staff',
+          allergies: gv(p+'allergies')||'None',
+          medications: gv(p+'medications')||'None',
+          applicantType: appType,
+          guardianEmail: appType==='youth'?gv('y_parentEmail'):gv('s_applicantEmail'),
+          parentName: appType==='youth'?gv('y_parentName'):gv('s_firstName')+' '+gv('s_lastName')
+        })
+      });
+      sendingMsg.style.display='none'; successMsg.style.display='block';
+      sendBtn.disabled=true;
+      sendBtn.innerHTML='&#10004; Application Submitted';
+      sendBtn.style.background='#95a5a6';
+      sendBtn.style.cursor='not-allowed';
+    } catch(err) {
+      sendingMsg.style.display='none'; errorMsg.style.display='block';
+      errorMsg.innerHTML='&#10007; Error: '+err.message+' — Please try again.'; sendBtn.disabled=false;
+    }
+  }
+</script>
+</body>
+</html>
