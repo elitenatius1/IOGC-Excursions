@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Teasers – IOGC 2026</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0f2044;
+    --gold: #c9a84c;
+    --gold-light: #e8c97a;
+    --cream: #faf8f3;
+    --white: #fff;
+    --dark: #080f20;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--dark);
+    color: var(--white);
+    overflow-x: hidden;
+  }
+
+  .hero {
+    position: relative;
+    min-height: 340px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 80px 20px 60px;
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 0%, rgba(201,168,76,0.18) 0%, transparent 70%),
+      linear-gradient(180deg, #0f2044 0%, #080f20 100%);
+    z-index: 0;
+  }
+
+  .particles { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+  .particle {
+    position: absolute;
+    border-radius: 50%;
+    background: var(--gold);
+    opacity: 0;
+    animation: drift linear infinite;
+  }
+  @keyframes drift {
+    0%   { transform: translateY(100%) scale(0); opacity: 0; }
+    10%  { opacity: 0.6; }
+    90%  { opacity: 0.3; }
+    100% { transform: translateY(-120px) scale(1.4); opacity: 0; }
+  }
+
+  .hero-content { position: relative; z-index: 1; }
+
+  .hero-eyebrow {
+    font-size: 11px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 16px;
+    opacity: 0;
+    animation: fadeUp 0.7s ease 0.2s forwards;
+  }
+
+  .hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(42px, 7vw, 72px);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -1px;
+    opacity: 0;
+    animation: fadeUp 0.7s ease 0.4s forwards;
+  }
+
+  .hero h1 em { font-style: italic; color: var(--gold); }
+
+  .hero-sub {
+    margin-top: 18px;
+    font-size: 16px;
+    color: rgba(255,255,255,0.65);
+    max-width: 500px;
+    opacity: 0;
+    animation: fadeUp 0.7s ease 0.6s forwards;
+  }
+
+  .gold-line {
+    width: 60px;
+    height: 2px;
+    background: linear-gradient(90deg, var(--gold), var(--gold-light));
+    margin: 24px auto 0;
+    opacity: 0;
+    animation: fadeUp 0.7s ease 0.8s forwards;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .wrap {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 60px 20px 80px;
+  }
+
+  .video-section-label {
+    font-size: 11px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 14px;
+  }
+
+  .video-card {
+    background: linear-gradient(145deg, #12264e, #0a1830);
+    border: 1px solid rgba(201,168,76,0.25);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow:
+      0 30px 80px rgba(0,0,0,0.5),
+      0 0 0 1px rgba(201,168,76,0.08),
+      inset 0 1px 0 rgba(255,255,255,0.05);
+    opacity: 0;
+    animation: fadeUp 0.8s ease 1s forwards;
+    margin-bottom: 24px;
+  }
+
+  .video-header {
+    padding: 24px 28px 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    border-bottom: 1px solid rgba(201,168,76,0.12);
+  }
+
+  .video-num {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold), #b8922e);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Playfair Display', serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--navy);
+    flex-shrink: 0;
+  }
+
+  .video-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px;
+    color: var(--white);
+  }
+  .video-title span { color: var(--gold); }
+
+  .video-thumb {
+    position: relative;
+    width: 100%;
+    padding-bottom: 56.25%;
+    background: linear-gradient(135deg, #0a1628, #0f2044);
+    overflow: hidden;
+  }
+
+  .video-thumb::before,
+  .video-thumb::after {
+    content: '';
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    border-color: rgba(201,168,76,0.3);
+    border-style: solid;
+    z-index: 1;
+  }
+  .video-thumb::before { top: 16px; left: 16px; border-width: 2px 0 0 2px; }
+  .video-thumb::after  { bottom: 16px; right: 16px; border-width: 0 2px 2px 0; }
+
+  .video-thumb-inner {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    text-decoration: none;
+    transition: background 0.3s ease;
+  }
+
+  .video-thumb-inner:hover { background: rgba(201,168,76,0.06); }
+
+  .play-btn {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold), #b8922e);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 40px rgba(201,168,76,0.4), 0 8px 30px rgba(0,0,0,0.4);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+  }
+
+  .video-thumb-inner:hover .play-btn {
+    transform: scale(1.1);
+    box-shadow: 0 0 60px rgba(201,168,76,0.6), 0 12px 40px rgba(0,0,0,0.5);
+  }
+
+  .play-btn svg { width: 28px; height: 28px; fill: var(--navy); margin-left: 4px; }
+
+  .play-label {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    color: var(--white);
+    letter-spacing: 0.5px;
+  }
+
+  .play-sublabel {
+    font-size: 12px;
+    color: rgba(255,255,255,0.45);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-top: -12px;
+  }
+
+  .video-footer {
+    padding: 14px 28px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.35);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-top: 1px solid rgba(201,168,76,0.08);
+  }
+  .video-footer::before { content: '↗'; color: var(--gold); font-size: 13px; }
+
+  .coming-soon {
+    margin-top: 50px;
+    border: 1px dashed rgba(201,168,76,0.3);
+    border-radius: 16px;
+    padding: 40px 20px;
+    text-align: center;
+    opacity: 0;
+    animation: fadeUp 0.8s ease 1.3s forwards;
+  }
+
+  .coming-soon .cs-icon { font-size: 36px; margin-bottom: 14px; }
+
+  .coming-soon h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    color: var(--gold);
+    margin-bottom: 8px;
+  }
+
+  .coming-soon p {
+    font-size: 14px;
+    color: rgba(255,255,255,0.5);
+    max-width: 380px;
+    margin: 0 auto;
+    line-height: 1.7;
+  }
+
+  .dots { display: flex; justify-content: center; gap: 10px; margin-top: 24px; }
+
+  .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: rgba(201,168,76,0.25);
+    border: 1px solid rgba(201,168,76,0.4);
+  }
+
+  .dot.active {
+    background: var(--gold);
+    box-shadow: 0 0 10px rgba(201,168,76,0.6);
+  }
+</style>
+</head>
+<body>
+
+<div class="particles" id="particles"></div>
+
+<div class="hero">
+  <div class="hero-content">
+    <div class="hero-eyebrow">IOGC 2026 &nbsp;·&nbsp; Exclusive Previews</div>
+    <h1>The <em>Teasers</em></h1>
+    <p class="hero-sub">A first look at what awaits. More videos dropping soon.</p>
+    <div class="gold-line"></div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <div class="video-section-label">Now Playing &nbsp;— &nbsp;Videos 1 &amp; 2 of 5</div>
+
+  <div class="video-card">
+    <div class="video-header">
+      <div class="video-num">1</div>
+      <div class="video-title">IOGC 2026 <span>Teaser</span></div>
+    </div>
+
+    <div class="video-thumb">
+      <a class="video-thumb-inner"
+         href="https://drive.google.com/file/d/11pjkCqEAdlkCCZ1OIyGN-k6MuQjXVyl1/view?usp=sharing"
+         target="_blank"
+         rel="noopener noreferrer">
+        <div class="play-btn">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 5v14l11-7z"/>
+          </svg>
+        </div>
+        <div class="play-label">Watch Teaser</div>
+        <div class="play-sublabel">Opens in Google Drive</div>
+      </a>
+    </div>
+
+    <div class="video-footer">Click to open video in a new tab</div>
+  </div>
+
+  <div class="video-card">
+    <div class="video-header">
+      <div class="video-num">2</div>
+      <div class="video-title">IOGC 2026 <span>Teaser</span></div>
+    </div>
+
+    <div class="video-thumb">
+      <a class="video-thumb-inner"
+         href="https://drive.google.com/file/d/12bi8vAAAxz46AA74Wg1lPLFkYMzEsZ6M/view?usp=sharing"
+         target="_blank"
+         rel="noopener noreferrer">
+        <div class="play-btn">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 5v14l11-7z"/>
+          </svg>
+        </div>
+        <div class="play-label">Watch Teaser</div>
+        <div class="play-sublabel">Opens in Google Drive</div>
+      </a>
+    </div>
+
+    <div class="video-footer">Click to open video in a new tab</div>
+  </div>
+
+  <div class="coming-soon">
+    <div class="cs-icon">🎬</div>
+    <h3>More Teasers Coming Soon</h3>
+    <p>Three more exclusive previews will be added here. Check back as we get closer to IOGC 2026.</p>
+    <div class="dots">
+      <div class="dot active"></div>
+      <div class="dot active"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const container = document.getElementById('particles');
+  for (let i = 0; i < 18; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    const size = Math.random() * 4 + 2;
+    p.style.cssText = `
+      width: ${size}px;
+      height: ${size}px;
+      left: ${Math.random() * 100}%;
+      bottom: -10px;
+      animation-duration: ${Math.random() * 8 + 6}s;
+      animation-delay: ${Math.random() * 8}s;
+    `;
+    container.appendChild(p);
+  }
+</script>
+
+</body>
+</html>
