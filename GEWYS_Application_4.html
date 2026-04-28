@@ -706,7 +706,8 @@
     fl("Physician Phone:", gv(p+'physicianPhone'), M, y, M+PW); y+=5;
     fl("Insurance:", gv(p+'insuranceName'), M, y, M+PW); y+=5;
     fl("Policy No.:", gv(p+'insurancePolicyNo'), M, y, M+PW); y+=8;
-
+    if (appType==='youth') { fl("Last DPT/Tetanus:", gv('y_immunDate')||'N/A', M, y, M+PW); y+=6; }
+    else { fl("Tetanus Status:", (gv('s_tetanusStatus')||'N/A') + " — " + (gv('s_tetanusDate')||'Date unknown'), M, y, M+PW); y+=6; }
     const condName = appType==='youth'?'y_conditions':'s_conditions';
     const conds=[]; document.querySelectorAll('input[name="'+condName+'"]:checked').forEach(c=>conds.push(c.value));
     lb("Medical Conditions:", M, y); y+=5;
