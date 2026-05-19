@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>National Seminar Local Committee</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #C8962E;
+    --gold-light: #E8B84B;
+    --deep: #1A1200;
+    --dark: #2B1F00;
+    --mid: #4A3800;
+    --cream: #FDF6E3;
+    --cream-dark: #F5E9C8;
+    --white: #FFFFFF;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Lato', sans-serif;
+    background: var(--cream);
+    color: var(--deep);
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  header {
+    background: var(--deep);
+    text-align: center;
+    padding: 48px 24px 40px;
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 20px,
+      rgba(200,150,46,0.04) 20px,
+      rgba(200,150,46,0.04) 40px
+    );
+  }
+  .header-ornament {
+    color: var(--gold);
+    font-size: 1.1rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    font-family: 'Lato', sans-serif;
+    font-weight: 300;
+    margin-bottom: 16px;
+    position: relative;
+  }
+  .header-ornament span {
+    display: inline-block;
+    margin: 0 12px;
+  }
+  h1 {
+    font-family: 'Playfair Display', serif;
+    color: var(--white);
+    font-size: clamp(1.8rem, 5vw, 3rem);
+    font-weight: 900;
+    line-height: 1.15;
+    position: relative;
+  }
+  h1 em {
+    color: var(--gold-light);
+    font-style: normal;
+  }
+  .header-rule {
+    width: 80px;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    margin: 20px auto 0;
+  }
+
+  /* LAYOUT */
+  main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 48px 20px 64px;
+  }
+
+  /* COMMITTEE GRID */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 28px;
+  }
+
+  /* CARD */
+  .card {
+    background: var(--white);
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    animation: fadeUp 0.5s both;
+  }
+  .card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 28px rgba(0,0,0,0.13);
+  }
+  .card-header {
+    background: var(--dark);
+    padding: 18px 22px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .card-icon {
+    width: 38px;
+    height: 38px;
+    background: var(--gold);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+  }
+  .card-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--white);
+    line-height: 1.2;
+  }
+  .card-body {
+    padding: 18px 22px;
+  }
+  .member {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--cream-dark);
+    font-size: 0.9rem;
+    color: var(--mid);
+    font-weight: 400;
+    line-height: 1.4;
+  }
+  .member:last-child { border-bottom: none; }
+  .member::before {
+    content: '✦';
+    color: var(--gold);
+    font-size: 0.6rem;
+    margin-top: 4px;
+    flex-shrink: 0;
+  }
+
+  /* NOTES */
+  .card-note {
+    background: #fffbe8;
+    border-left: 3px solid var(--gold);
+    padding: 8px 12px;
+    margin-top: 10px;
+    font-size: 0.82rem;
+    color: var(--mid);
+    font-style: italic;
+    border-radius: 0 2px 2px 0;
+  }
+
+  /* DUTIES BOX */
+  .duties-box {
+    background: var(--cream-dark);
+    border-radius: 3px;
+    padding: 10px 14px;
+    margin-top: 10px;
+    font-size: 0.82rem;
+    color: var(--dark);
+  }
+  .duties-box strong {
+    display: block;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--gold);
+    margin-bottom: 4px;
+  }
+  .duties-box ul {
+    list-style: none;
+    padding: 0;
+  }
+  .duties-box ul li {
+    padding: 3px 0;
+    padding-left: 14px;
+    position: relative;
+  }
+  .duties-box ul li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    color: var(--gold);
+    font-size: 0.75rem;
+  }
+
+  /* FULL WIDTH CARD */
+  .card.full {
+    grid-column: 1 / -1;
+  }
+  .full .card-body {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 0 24px;
+  }
+
+  /* ANIMATION */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .card:nth-child(1)  { animation-delay: 0.05s; }
+  .card:nth-child(2)  { animation-delay: 0.10s; }
+  .card:nth-child(3)  { animation-delay: 0.15s; }
+  .card:nth-child(4)  { animation-delay: 0.20s; }
+  .card:nth-child(5)  { animation-delay: 0.25s; }
+  .card:nth-child(6)  { animation-delay: 0.30s; }
+  .card:nth-child(7)  { animation-delay: 0.35s; }
+  .card:nth-child(8)  { animation-delay: 0.40s; }
+  .card:nth-child(9)  { animation-delay: 0.45s; }
+
+  /* FOOTER */
+  footer {
+    background: var(--deep);
+    color: rgba(255,255,255,0.4);
+    text-align: center;
+    padding: 20px;
+    font-size: 0.8rem;
+    letter-spacing: 0.05em;
+  }
+
+  @media (max-width: 600px) {
+    .full .card-body { grid-template-columns: 1fr; }
+  }
+
+  /* SECTION HEADING */
+  .section-heading {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-top: 16px;
+  }
+  .section-heading h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    color: var(--dark);
+    white-space: nowrap;
+  }
+  .section-heading::after {
+    content: '';
+    flex: 1;
+    height: 2px;
+    background: linear-gradient(90deg, var(--gold), transparent);
+  }
+
+  /* REGISTRATION TABLE */
+  .reg-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+  }
+  .reg-table thead tr {
+    background: var(--dark);
+    color: var(--white);
+  }
+  .reg-table thead th {
+    padding: 11px 16px;
+    text-align: left;
+    font-family: 'Lato', sans-serif;
+    font-weight: 700;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .reg-table thead th.count-col { text-align: center; }
+  .reg-table tbody tr {
+    border-bottom: 1px solid var(--cream-dark);
+    transition: background 0.15s;
+  }
+  .reg-table tbody tr:last-child { border-bottom: none; }
+  .reg-table tbody tr:hover { background: #fffbe8; }
+  .reg-table td {
+    padding: 10px 16px;
+    color: var(--mid);
+    vertical-align: middle;
+  }
+  .reg-table .table-label {
+    font-weight: 700;
+    color: var(--dark);
+    white-space: nowrap;
+  }
+  .reg-table .member-name {
+    font-weight: 600;
+    color: var(--dark);
+  }
+  .reg-table .cities {
+    color: var(--mid);
+  }
+  .reg-table .count-badge {
+    display: inline-block;
+    background: var(--gold);
+    color: var(--white);
+    font-weight: 700;
+    font-size: 0.85rem;
+    border-radius: 20px;
+    padding: 3px 12px;
+    min-width: 44px;
+    text-align: center;
+  }
+  .reg-table .count-col { text-align: center; }
+  .reg-table tr.group-row td { padding-top: 14px; }
+  .reg-table tr.sub-row td.table-label { color: transparent; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-ornament"><span>✦</span> Israel of God's Church &nbsp;·&nbsp; W.H.A. <span>✦</span></div>
+  <h1>National Seminar<br><em>Local Committee &amp; Schedule</em></h1>
+  <div class="header-rule"></div>
+</header>
+
+<main>
+  <div class="grid">
+
+    <!-- Hotel & Media -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">🏨</div>
+        <div class="card-title">Hotel &amp; Media</div>
+      </div>
+      <div class="card-body">
+        <div class="member">Sister Tiana Nelson</div>
+        <div class="member">Sister Nikki Slater</div>
+        <div class="member">Sister Raven Moore</div>
+        <div class="member">Reverend Chibale</div>
+        <div class="card-note">Friday, May 22nd — Setup at Hotel</div>
+      </div>
+    </div>
+
+    <!-- Decorations -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">🎀</div>
+        <div class="card-title">Decorations</div>
+      </div>
+      <div class="card-body">
+        <div class="member">Mother Jean Blackwell</div>
+        <div class="member">Sister Ashala Moore</div>
+        <div class="member">Sister Nikki Slater</div>
+        <div class="member">Sister Margaret Nelson</div>
+        <div class="member">Sister Carmen Black</div>
+        <div class="member">Sister Michelle Reynolds</div>
+        <div class="member">Sister Ardentrice Chibale</div>
+      </div>
+    </div>
+
+    <!-- Decorations Setup Schedule - Full Width -->
+    <div class="card full">
+      <div class="card-header">
+        <div class="card-icon">📅</div>
+        <div class="card-title">Decorations — Setup Schedule</div>
+      </div>
+      <div class="card-body" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px 28px;">
+
+        <!-- Friday Night Stage -->
+        <div>
+          <div style="font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--gold);padding:4px 0 10px;border-bottom:2px solid var(--gold);margin-bottom:10px;">
+            Set Up — Friday Night Stage<br><span style="font-weight:400;color:var(--mid);font-style:italic;">(Saturday Morning)</span>
+          </div>
+          <div class="member">Sister Reynolds</div>
+          <div class="member">Sister Carmen</div>
+          <div class="member">Mother Blackwell</div>
+          <div class="member">Sister Ashala</div>
+          <div class="member">Deacon James</div>
+          <div class="member">Bro. Christopher</div>
+        </div>
+
+        <!-- Saturday Night -->
+        <div>
+          <div style="font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--gold);padding:4px 0 10px;border-bottom:2px solid var(--gold);margin-bottom:10px;">
+            Set Up — Saturday Night
+          </div>
+          <div class="member">Sister Reynolds</div>
+          <div class="member">Sister Carmen</div>
+          <div class="member">Mother Blackwell</div>
+          <div class="member">Sister Ashala</div>
+          <div class="member">Sister Chibale</div>
+          <div class="member">Deacon James</div>
+          <div class="member">Brother Christopher</div>
+        </div>
+
+        <!-- Sunday -->
+        <div>
+          <div style="font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--gold);padding:4px 0 10px;border-bottom:2px solid var(--gold);margin-bottom:10px;">
+            Set Up After Dinner — Sunday
+          </div>
+          <div class="member">All Decorating Committee</div>
+          <div class="member">Deacon James</div>
+          <div class="member">Brother Grant</div>
+          <div class="member">Brother Christopher</div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Food & Beverage -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">🍽️</div>
+        <div class="card-title">Food &amp; Beverage</div>
+      </div>
+      <div class="card-body">
+        <div class="member">Mother Jean Blackwell</div>
+        <div class="member">Sister Margaret Nelson</div>
+        <div class="member">Sister Tiana Nelson</div>
+      </div>
+    </div>
+
+    <!-- Food & Beverage Details - Full Width -->
+    <div class="card full">
+      <div class="card-header">
+        <div class="card-icon">🚚</div>
+        <div class="card-title">Food &amp; Beverage — Restaurant Details &amp; Logistics</div>
+      </div>
+      <div class="card-body" style="padding:0;">
+        <div class="card-note" style="margin:16px 22px 0; border-radius:3px;">
+          🏨 <strong>Saturday Lunch</strong> will be delivered at the hotel.
+        </div>
+        <table class="reg-table" style="margin-top:12px;">
+          <thead>
+            <tr>
+              <th>Restaurant</th>
+              <th>Pick Up / Delivery</th>
+              <th>Address</th>
+              <th>Payment</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="member-name">Stango Cuisine (Zambian)</td>
+              <td class="cities">Delivered by 2:30 PM</td>
+              <td class="cities">—</td>
+              <td class="cities">Pay in advance</td>
+            </tr>
+            <tr>
+              <td class="member-name">Chinese — Northlands Chop Suey</td>
+              <td class="cities">Pick up — Sis Nikki @ 4:00 PM</td>
+              <td class="cities">9240 West Florissant Ave</td>
+              <td class="cities">—</td>
+            </tr>
+            <tr>
+              <td class="member-name">Chinese — China Chop Suey</td>
+              <td class="cities">Pick up — Bro D'Marco or Sis Margaret @ 4:00 PM</td>
+              <td><span style="background:#fff59d;color:#5a4a00;padding:2px 8px;border-radius:3px;font-size:0.8rem;font-weight:700;">Confirm Address</span></td>
+              <td class="cities">—</td>
+            </tr>
+            <tr>
+              <td class="member-name">Imo's Pizza</td>
+              <td class="cities">Delivery by 4:30 PM</td>
+              <td><span style="background:#fff59d;color:#5a4a00;padding:2px 8px;border-radius:3px;font-size:0.8rem;font-weight:700;">Confirm Address</span></td>
+              <td class="cities">—</td>
+            </tr>
+            <tr>
+              <td class="member-name">Pappy's Smokehouse</td>
+              <td class="cities">Delivery by 4:00 PM</td>
+              <td class="cities">3106 Olive</td>
+              <td class="cities">Pay in advance (ask about check)</td>
+            </tr>
+            <tr>
+              <td class="member-name">STL Grill</td>
+              <td class="cities">Pick up — Sis Chibale @ 4:00 PM</td>
+              <td><span style="background:#fff59d;color:#5a4a00;padding:2px 8px;border-radius:3px;font-size:0.8rem;font-weight:700;">Confirm Address</span></td>
+              <td class="cities">—</td>
+            </tr>
+            <tr>
+              <td class="member-name">Ted Drews</td>
+              <td class="cities">Pick up Thursday — Sis Margaret or Mother Blackwell</td>
+              <td class="cities">6726 Chippewa</td>
+              <td class="cities">In person</td>
+            </tr>
+            <tr>
+              <td class="member-name">Gooey Butter Cake</td>
+              <td class="cities">Pick up Thursday — Mother Blackwell</td>
+              <td class="cities">6736 Chippewa</td>
+              <td class="cities">In person</td>
+            </tr>
+            <tr>
+              <td class="member-name">Sam's Sheet Cake</td>
+              <td class="cities">Pick up Friday — Sis Margaret or Sister Tierra</td>
+              <td class="cities">—</td>
+              <td class="cities">In person</td>
+            </tr>
+            <tr>
+              <td class="member-name">Mac N Cheese</td>
+              <td class="cities">Deacon Nelson bringing by 4:00 PM</td>
+              <td class="cities">—</td>
+              <td class="cities">—</td>
+            </tr>
+            <tr>
+              <td class="member-name">Baked Beans</td>
+              <td class="cities">Sister Tiana bringing by 4:00 PM</td>
+              <td class="cities">—</td>
+              <td class="cities">—</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Excursions -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">🗺️</div>
+        <div class="card-title">Excursions</div>
+      </div>
+      <div class="card-body">
+        <div class="member">Deacon Dorian Williams</div>
+        <div class="member">Deacon Michael Williams</div>
+        <div class="member">Sister Margaret Nelson</div>
+        <div class="member">Deacon Charles Nelson</div>
+      </div>
+    </div>
+
+    <!-- Website -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">💻</div>
+        <div class="card-title">Website</div>
+      </div>
+      <div class="card-body">
+        <div class="member">Brother D'Marco Williams</div>
+        <div class="member">Deacon Brenden Benford</div>
+        <div class="member">Sister Tiana Nelson</div>
+        <div class="member">Reverend Chibale</div>
+      </div>
+    </div>
+
+    <!-- Swag -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">🎁</div>
+        <div class="card-title">Swag</div>
+      </div>
+      <div class="card-body">
+        <div class="member">Sister Raven Moore</div>
+        <div class="member">Sister Tiana Nelson</div>
+        <div class="member">Deacon Charles Nelson</div>
+      </div>
+    </div>
+
+    <!-- Welcome Committee -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">👋</div>
+        <div class="card-title">Welcome Committee</div>
+      </div>
+      <div class="card-body">
+        <div class="member">Brother Lance Knuckles</div>
+        <div class="member">Sister Kristina Knuckles</div>
+        <div class="member">Sister Tierra Nelson</div>
+        <div class="member">Sister Ardentrice Chibale</div>
+        <div class="member">Brother Tre Nelson</div>
+        <div class="member">Sister Maliyah Hayden</div>
+        <div class="card-note">Directing people where to go — 7:00 AM arrival</div>
+      </div>
+    </div>
+
+    <!-- Clean Up Crew - Full Width -->
+    <div class="card full">
+      <div class="card-header">
+        <div class="card-icon">🧹</div>
+        <div class="card-title">Clean Up Crew</div>
+      </div>
+      <div class="card-body">
+        <div>
+          <div class="member">Deacon Charles Nelson</div>
+          <div class="member">Deacon Keith Sims</div>
+          <div class="member">Deacon Dorian Williams</div>
+          <div class="member">All Local Brethren</div>
+        </div>
+        <div>
+          <div style="font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--gold);padding:8px 0 4px;">During Clean Up</div>
+          <div class="member">Deacon Dorian</div>
+          <div class="member">Deacon Brenden</div>
+          <div class="member">Brother Morris</div>
+          <div class="member">Deacon Charles</div>
+          <div class="member">Brother Tre</div>
+        </div>
+        <div>
+          <div style="font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--gold);padding:8px 0 4px;"> </div>
+          <div class="member">Sister Tiana</div>
+          <div class="member">Sister Nikki</div>
+          <div class="member">Sister Tierra</div>
+          <div class="member">Sister Bailey</div>
+          <div class="member">Sister Mary</div>
+        </div>
+        <div>
+          <div class="duties-box">
+            <strong>Duties</strong>
+            <ul>
+              <li>Check each meeting room for snack station stock at :15 and :45 after the hour</li>
+              <li>Check each room for garbage</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION DIVIDER: Registration -->
+    <div class="section-heading">
+      <h2>📋 Registration — Seminar Committee</h2>
+    </div>
+
+    <!-- Registration Table - Full Width -->
+    <div class="card full">
+      <div class="card-header">
+        <div class="card-icon">📝</div>
+        <div class="card-title">Registration — Assigned Cities &amp; Counts</div>
+      </div>
+      <div class="card-body" style="padding:0;">
+        <table class="reg-table">
+          <thead>
+            <tr>
+              <th style="width:90px;">Table</th>
+              <th>Committee Members</th>
+              <th>Assigned Cities</th>
+              <th class="count-col">Count</th>
+              <th>Swag Help</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="group-row">
+              <td class="table-label" rowspan="2">Table 1</td>
+              <td class="member-name">Sister Roselyn Snell</td>
+              <td class="cities" rowspan="2">Saint Louis</td>
+              <td class="count-col" rowspan="2"><span class="count-badge">70</span></td>
+              <td class="cities">Sister Aisja</td>
+            </tr>
+            <tr class="sub-row">
+              <td class="member-name">Bro. D'Marco</td>
+              <td class="cities">Brother Grant</td>
+            </tr>
+            <tr class="group-row">
+              <td class="table-label" rowspan="2">Table 2</td>
+              <td class="member-name">Sister April Davis</td>
+              <td class="cities" rowspan="2">Rockford</td>
+              <td class="count-col" rowspan="2"><span class="count-badge">50</span></td>
+              <td class="cities">Sister Lydia</td>
+            </tr>
+            <tr class="sub-row">
+              <td class="member-name">Sis. Chibale</td>
+              <td class="cities">Sister Maliyah</td>
+            </tr>
+            <tr class="group-row">
+              <td class="table-label" rowspan="2">Table 3</td>
+              <td class="member-name">Sister Tiana</td>
+              <td class="cities" rowspan="2">Sycamore / Detroit</td>
+              <td class="count-col" rowspan="2"><span class="count-badge">69</span></td>
+              <td class="cities">Sister Jayla</td>
+            </tr>
+            <tr class="sub-row">
+              <td class="member-name">Sister Mary</td>
+              <td class="cities">Sister Olivia</td>
+            </tr>
+            <tr class="group-row">
+              <td class="table-label" rowspan="2">Table 4</td>
+              <td class="member-name">Deacon Charles Nelson</td>
+              <td class="cities">Wilmar / Port Huron / Los Angeles</td>
+              <td class="count-col"><span class="count-badge">35</span></td>
+              <td class="cities">Sister Aryanna</td>
+            </tr>
+            <tr class="sub-row">
+              <td class="member-name">Sister Nikki</td>
+              <td class="cities">Danville / Racine / Terre Haute</td>
+              <td class="count-col"><span class="count-badge">44</span></td>
+              <td class="cities">Sister Aliya</td>
+            </tr>
+            <tr class="group-row">
+              <td class="table-label" rowspan="2">Table 5</td>
+              <td class="member-name">Sister Margaret</td>
+              <td class="cities">Galesburg / Indianapolis</td>
+              <td class="count-col"><span class="count-badge">37</span></td>
+              <td class="cities">Sister Destiny</td>
+            </tr>
+            <tr class="sub-row">
+              <td class="member-name">Sister Raven</td>
+              <td class="cities">Chicago</td>
+              <td class="count-col"><span class="count-badge">39</span></td>
+              <td class="cities">Sister Faith</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<footer>National Seminar &nbsp;·&nbsp; Local Committee &amp; Schedule</footer>
+
+</body>
+</html>
